@@ -7,10 +7,17 @@ from pydantic import BaseModel
 import mediapipe as mp
 import os
 from gtts import gTTS
+from fastapi.middleware.cors import CORSMiddleware
 
 # Start API
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"],  
+    allow_headers=["*"],  
+)
 # model paths
 model_paths = {
     "arabic_letters": "models/Aalpha2_sign_language_model.h5",
