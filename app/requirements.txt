@@ -1,7 +1,1 @@
-fastapi
-tensorflow
-uvicorn
-mediapipe
-gtts
-opencv-python
-numpy
+
