@@ -20,10 +20,10 @@ app.add_middleware(
 )
 # model paths
 model_paths = {
-    "arabic_letters": "models/Aalpha2_sign_language_model.h5",
-    "arabic_numbers": "models/AN2_sign_language_model.h5",
-    "english_letters": "models/E_alpha_sign_language_model.h5",
-    "english_numbers": "models/EN_sign_language_model.h5"
+    "arabic_letters": "app/models/Aalpha2_sign_language_model.h5",
+    "arabic_numbers": "app/models/AN2_sign_language_model.h5",
+    "english_letters": "app/models/E_alpha_sign_language_model.h5",
+    "english_numbers": "app/models/EN_sign_language_model.h5"
 }
 
 #  load models
