@@ -1,7 +1,8 @@
 fastapi
-tensorflow
 uvicorn
-mediapipe
-gtts
-opencv-python
 numpy
+tensorflow
+opencv-python
+mediapipe
+pydantic
+gtts
