@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import mediapipe as mp
 import os
+import base64
 from gtts import gTTS
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -68,10 +69,13 @@ mp_drawing = mp.solutions.drawing_utils
 #  the text
 text_field = ""
 
-# BaseModel
+# BaseModels
 class LanguageRequest(BaseModel):
     language: str 
-    mode: str     
+    mode: str
+
+class PredictionRequest(BaseModel):    
+    frame: str     
 
 #  1- set language 
 @app.post("/set_language/")
@@ -109,36 +113,33 @@ def text_to_speech(text):
 
 # 2- predict
 @app.post("/predict/")
-async def predict(request: dict):
+async def predict(request: PredictionRequest):
     global text_field
-    frame = request['frame'] 
-
+    
+    # Decode Base64 to numpy array
+    frame_data = base64.b64decode(request.frame)
+    nparr = np.frombuffer(frame_data, np.uint8)
+    frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     results = hands.process(frame_rgb)
 
     if results.multi_hand_landmarks:
         for hand_landmarks in results.multi_hand_landmarks:
-
             landmarks = np.array([[lm.x, lm.y, lm.z] for lm in hand_landmarks.landmark]).reshape(1, 21, 3)
-
             prediction = models[current_language].predict(landmarks)
             label = categories[current_language][np.argmax(prediction)]
-
-            # change to labels in mapping
             mapped_label = mapping[current_language].get(label, label)
 
-            if mapped_label == "مسافة":
+            if mapped_label == "مسافة" or mapped_label == "space":
                 text_field += " "
-            elif mapped_label == "حذف":
+            elif mapped_label == "حذف" or mapped_label == "delete":
                 text_field = text_field[:-1]
-            elif mapped_label == "delete":
-                text_field = text_field[:-1] 
-            elif mapped_label == "space":
-                 text_field += " "
             else:
                 text_field += mapped_label
 
     return {"text": text_field}
+
 
 # 3- text to speech
 @app.get("/text_to_speech/")
