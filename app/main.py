@@ -141,9 +141,30 @@ async def predict(request: PredictionRequest):
     return {"text": text_field}
 
 
+# # 3- text to speech
+# @app.get("/text_to_speech/")
+# async def speak_text():
+#     text_to_speech(text_field)
+#     return {"message": "Text-to-speech is played", "text": text_field}
+    
 # 3- text to speech
 @app.get("/text_to_speech/")
 async def speak_text():
+    global text_field
     text_to_speech(text_field)
     return {"message": "Text-to-speech is played", "text": text_field}
+
+
+# 4- reset the text
+@app.post("/reset_text/")
+async def reset_text():
+    global text_field
+    text_field = ""  
+    return {"message": "Text field has been reset"}
+
+
+
+
+
+    
 
