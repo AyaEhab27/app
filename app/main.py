@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import tensorflow as tf
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import mediapipe as mp
