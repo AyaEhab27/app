@@ -105,12 +105,10 @@ async def set_language(request: LanguageRequest):
     return {"message": f"Language set to {language} with {mode} mode"}
 
 # convert text to speech
-def text_to_speech(text):
-    lang = 'ar' if current_language.startswith("arabic") else 'en'
+def text_to_speech(text, lang):
     tts = gTTS(text=text, lang=lang)
     tts.save("output.mp3")
     os.system("start output.mp3")
-
 # 2- predict
 @app.post("/predict/")
 async def predict(request: PredictionRequest):
@@ -149,11 +147,13 @@ async def predict(request: PredictionRequest):
     
 # 3- text to speech
 @app.get("/text_to_speech/")
-async def speak_text():
-    global text_field
-    text_to_speech(text_field)
-    return {"message": "Text-to-speech is played", "text": text_field}
-
+async def speak_text(text: str = Query(..., description="The text to convert to speech"), 
+                     language: str = Query(..., description="The language of the text (ar/en)")):
+    if language not in ["ar", "en"]:
+        raise HTTPException(status_code=400, detail="Invalid language. Use 'ar' for Arabic or 'en' for English.")
+    
+    text_to_speech(text, language)
+    return {"message": "Text-to-speech is played", "text": text}
 
 # 4- reset the text
 @app.post("/reset_text/")
