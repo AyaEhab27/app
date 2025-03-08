@@ -2,10 +2,11 @@ import cv2
 import numpy as np
 import tensorflow as tf
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from pydantic import BaseModel
 import mediapipe as mp
 import os
+import time
 import base64
 from gtts import gTTS
 from fastapi.middleware.cors import CORSMiddleware
@@ -104,12 +105,53 @@ async def set_language(request: LanguageRequest):
     current_mode = mode
     return {"message": f"Language set to {language} with {mode} mode"}
 
+
+AUDIO_FOLDER = "audio_files"
+if not os.path.exists(AUDIO_FOLDER):
+    os.makedirs(AUDIO_FOLDER)
+
+
 # convert text to speech
 def text_to_speech(text, lang):
-    tts = gTTS(text=text, lang=lang)
-    tts.save("output.mp3")
-    os.system("start output.mp3")
-# 2- predict
+    try:
+        timestamp = int(time.time())
+        output_file = os.path.join(AUDIO_FOLDER, f"output_{timestamp}.mp3")
+        tts = gTTS(text=text, lang=lang)
+        tts.save(output_file)
+        os.system(f"start {output_file}")
+        
+        return output_file  
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error in text-to-speech: {str(e)}")
+
+# 2- text to speech
+@app.get("/text_to_speech/")
+async def speak_text(text: str = Query(..., description="The text to convert to speech"), 
+                     language: str = Query(..., description="The language of the text (ar/en)")):
+    if language not in ["ar", "en"]:
+        raise HTTPException(status_code=400, detail="Invalid language. Use 'ar' for Arabic or 'en' for English.")
+    
+    lang = "ar" if language == "ar" else "en"
+    
+    audio_file = text_to_speech(text, lang)
+    
+    return {
+        "message": "Text-to-speech is played",
+        "text": text,
+        "audio_file": audio_file 
+    }
+
+
+# 3- download audio
+@app.get("/download_audio/")
+async def download_audio(file_path: str = Query(..., description="Path to the audio file")):
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Audio file not found")
+    
+    return FileResponse(file_path, media_type="audio/mp3", filename=os.path.basename(file_path))
+
+
+# 4- predict
 @app.post("/predict/")
 async def predict(request: PredictionRequest):
     global text_field
@@ -145,15 +187,6 @@ async def predict(request: PredictionRequest):
 #     text_to_speech(text_field)
 #     return {"message": "Text-to-speech is played", "text": text_field}
     
-# 3- text to speech
-@app.get("/text_to_speech/")
-async def speak_text(text: str = Query(..., description="The text to convert to speech"), 
-                     language: str = Query(..., description="The language of the text (ar/en)")):
-    if language not in ["ar", "en"]:
-        raise HTTPException(status_code=400, detail="Invalid language. Use 'ar' for Arabic or 'en' for English.")
-    
-    text_to_speech(text, language)
-    return {"message": "Text-to-speech is played", "text": text}
 
 # 4- reset the text
 @app.post("/reset_text/")
