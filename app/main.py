@@ -10,6 +10,22 @@ import time
 import base64
 from gtts import gTTS
 from fastapi.middleware.cors import CORSMiddleware
+import firebase_admin
+from firebase_admin import credentials, storage
+import json
+
+json_path = r"C:\Users\ALSERAG FOR LAPTOP\OneDrive\Documents\sound-6893c-firebase-adminsdk-fbsvc-8104119578.json"
+
+with open(json_path, "r") as f:
+    data = json.load(f)
+    bucket_name = f"{data['project_id']}.appspot.com"  
+
+cred = credentials.Certificate(json_path)
+firebase_admin.initialize_app(cred, {
+    'storageBucket': bucket_name
+})
+
+print("Firebase Storage Bucket:", bucket_name)
 
 # Start API
 app = FastAPI()
@@ -115,40 +131,39 @@ if not os.path.exists(AUDIO_FOLDER):
 def text_to_speech(text, lang):
     try:
         timestamp = int(time.time())
-        output_file = os.path.join(AUDIO_FOLDER, f"output_{timestamp}.mp3")
+        output_file = f"output_{timestamp}.mp3"  
         tts = gTTS(text=text, lang=lang)
-        tts.save(output_file)
-        os.system(f"start {output_file}")
-        
-        return output_file  
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error in text-to-speech: {str(e)}")
+        tts.save(output_file) 
 
-# 2- text to speech
+        bucket = storage.bucket()
+        blob = bucket.blob(f"audio_files/{output_file}")  
+        blob.upload_from_filename(output_file) 
+
+        blob.make_public()
+
+        public_url = blob.public_url
+
+        os.remove(output_file)
+
+        return public_url  
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error in text-to-speech or Firebase upload: {str(e)}")
+
 @app.get("/text_to_speech/")
-async def speak_text(text: str = Query(..., description="The text to convert to speech"), 
+async def speak_text(text: str = Query(..., description="The text to convert to speech"),
                      language: str = Query(..., description="The language of the text (ar/en)")):
     if language not in ["ar", "en"]:
         raise HTTPException(status_code=400, detail="Invalid language. Use 'ar' for Arabic or 'en' for English.")
-    
+
     lang = "ar" if language == "ar" else "en"
-    
-    audio_file = text_to_speech(text, lang)
-    
+
+    audio_url = text_to_speech(text, lang)  
+
     return {
-        "message": "Text-to-speech is played",
+        "message": "Text-to-speech is ready",
         "text": text,
-        "audio_file": audio_file 
+        "audio_url": audio_url 
     }
-
-
-# 3- download audio
-@app.get("/download_audio/")
-async def download_audio(file_path: str = Query(..., description="Path to the audio file")):
-    if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="Audio file not found")
-    
-    return FileResponse(file_path, media_type="audio/mp3", filename=os.path.basename(file_path))
 
 
 # 4- predict
