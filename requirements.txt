@@ -7,3 +7,4 @@ mediapipe
 pydantic
 gtts
 python-multipart
+firebase-admin
