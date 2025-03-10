@@ -13,10 +13,10 @@ from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
 from firebase_admin import credentials, storage
 
-firebase_config_path = os.path.join(os.path.dirname(__file__), 'config', 'gestuer-vox-firebase-adminsdk-vwtxg-70a4598d9c.json')
+firebase_config_path = os.path.join(os.path.dirname(__file__), 'config', 'sound-6893c-firebase-adminsdk-fbsvc-8104119578.json')
 cred = credentials.Certificate(firebase_config_path)
 firebase_admin.initialize_app(cred, {
-    'storageBucket': 'gestuer-vox.appspot.com'  
+    'storageBucket': 'sound-6893c.appspot.com'  
 })
 
 # start API
