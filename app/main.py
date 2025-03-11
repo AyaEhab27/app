@@ -10,6 +10,7 @@ import time
 import base64
 from gtts import gTTS
 from fastapi.middleware.cors import CORSMiddleware
+from io import BytesIO
 
 # Start API
 app = FastAPI()
@@ -20,6 +21,7 @@ app.add_middleware(
     allow_methods=["*"],  
     allow_headers=["*"],  
 )
+
 # model paths
 model_paths = {
     "arabic_letters": "app/models/Aalpha2_sign_language_model.h5",
@@ -28,7 +30,7 @@ model_paths = {
     "english_numbers": "app/models/EN_sign_language_model.h5"
 }
 
-#  load models
+# load models
 models = {}
 for key, path in model_paths.items():
     models[key] = tf.keras.models.load_model(path)
@@ -67,7 +69,7 @@ mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(min_detection_confidence=0.7)
 mp_drawing = mp.solutions.drawing_utils
 
-#  the text
+# the text
 text_field = ""
 
 # BaseModels
@@ -78,7 +80,7 @@ class LanguageRequest(BaseModel):
 class PredictionRequest(BaseModel):    
     frame: str     
 
-#  1- set language 
+# 1- set language 
 @app.post("/set_language/")
 async def set_language(request: LanguageRequest):
     global current_language, current_mode
@@ -106,21 +108,17 @@ async def set_language(request: LanguageRequest):
     return {"message": f"Language set to {language} with {mode} mode"}
 
 
-AUDIO_FOLDER = "audio_files"
-if not os.path.exists(AUDIO_FOLDER):
-    os.makedirs(AUDIO_FOLDER)
-
-
 # convert text to speech
 def text_to_speech(text, lang):
     try:
-        timestamp = int(time.time())
-        output_file = os.path.join(AUDIO_FOLDER, f"output_{timestamp}.mp3")
+        audio_buffer = BytesIO()
         tts = gTTS(text=text, lang=lang)
-        tts.save(output_file)
-        os.system(f"start {output_file}")
-        
-        return output_file  
+        tts.write_to_fp(audio_buffer)
+        audio_buffer.seek(0) 
+
+        audio_base64 = base64.b64encode(audio_buffer.read()).decode('utf-8')
+
+        return audio_base64 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error in text-to-speech: {str(e)}")
 
@@ -133,25 +131,15 @@ async def speak_text(text: str = Query(..., description="The text to convert to 
     
     lang = "ar" if language == "ar" else "en"
     
-    audio_file = text_to_speech(text, lang)
+    audio_base64 = text_to_speech(text, lang)
     
     return {
-        "message": "Text-to-speech is played",
+        "message": "Text-to-speech is ready",
         "text": text,
-        "audio_file": audio_file 
+        "audio_base64": audio_base64  
     }
 
-
-# 3- download audio
-@app.get("/download_audio/")
-async def download_audio(file_path: str = Query(..., description="Path to the audio file")):
-    if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="Audio file not found")
-    
-    return FileResponse(file_path, media_type="audio/mp3", filename=os.path.basename(file_path))
-
-
-# 4- predict
+# 3- predict
 @app.post("/predict/")
 async def predict(request: PredictionRequest):
     global text_field
@@ -179,14 +167,6 @@ async def predict(request: PredictionRequest):
                 text_field += mapped_label
 
     return {"text": text_field}
-
-
-# # 3- text to speech
-# @app.get("/text_to_speech/")
-# async def speak_text():
-#     text_to_speech(text_field)
-#     return {"message": "Text-to-speech is played", "text": text_field}
-    
 
 # 4- reset the text
 @app.post("/reset_text/")
