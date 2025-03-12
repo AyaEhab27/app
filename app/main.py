@@ -11,6 +11,14 @@ import base64
 from gtts import gTTS
 from fastapi.middleware.cors import CORSMiddleware
 from io import BytesIO
+import firebase_admin
+from firebase_admin import credentials, storage
+
+#connect with firebase
+cred = credentials.Certificate("app/voice-ec9bd-firebase-adminsdk-fbsvc-0215fa1324.json")
+firebase_admin.initialize_app(cred, {
+    "storageBucket": "voice-ec9bd.com" 
+})
 
 # Start API
 app = FastAPI()
@@ -108,36 +116,73 @@ async def set_language(request: LanguageRequest):
     return {"message": f"Language set to {language} with {mode} mode"}
 
 
+# def text_to_speech(text, lang):
+#     try:
+#         audio_buffer = BytesIO()
+#         tts = gTTS(text=text, lang=lang)
+#         tts.write_to_fp(audio_buffer)
+#         audio_buffer.seek(0) 
+
+#         audio_base64 = base64.b64encode(audio_buffer.read()).decode('utf-8')
+
+#         return audio_base64 
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Error in text-to-speech: {str(e)}")
 # convert text to speech
 def text_to_speech(text, lang):
     try:
-        audio_buffer = BytesIO()
         tts = gTTS(text=text, lang=lang)
-        tts.write_to_fp(audio_buffer)
-        audio_buffer.seek(0) 
+        file_name = f"audio_{int(time.time())}.mp3"
+        file_path = f"temp/{file_name}"
 
-        audio_base64 = base64.b64encode(audio_buffer.read()).decode('utf-8')
+        tts.save(file_path)
 
-        return audio_base64 
+        bucket = storage.bucket()
+        blob = bucket.blob(f"audio/{file_name}")
+        blob.upload_from_filename(file_path)
+        blob.make_public()  
+
+        file_url = blob.public_url
+
+        return file_url
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error in text-to-speech: {str(e)}")
 
+
 # 2- text to speech
 @app.get("/text_to_speech/")
-async def speak_text(text: str = Query(..., description="The text to convert to speech"), 
+async def speak_text(text: str = Query(..., description="The text to convert to speech"),
                      language: str = Query(..., description="The language of the text (ar/en)")):
     if language not in ["ar", "en"]:
         raise HTTPException(status_code=400, detail="Invalid language. Use 'ar' for Arabic or 'en' for English.")
-    
+
     lang = "ar" if language == "ar" else "en"
     
-    audio_base64 = text_to_speech(text, lang)
-    
+    file_url = text_to_speech(text, lang)
+
     return {
         "message": "Text-to-speech is ready",
         "text": text,
-        "audio_base64": audio_base64  
+        "audio_url": file_url  # إرجاع رابط الصوت بدلاً من البيانات المشفرة Base64
     }
+
+
+# @app.get("/text_to_speech/")
+# async def speak_text(text: str = Query(..., description="The text to convert to speech"), 
+#                      language: str = Query(..., description="The language of the text (ar/en)")):
+#     if language not in ["ar", "en"]:
+#         raise HTTPException(status_code=400, detail="Invalid language. Use 'ar' for Arabic or 'en' for English.")
+    
+#     lang = "ar" if language == "ar" else "en"
+    
+#     audio_base64 = text_to_speech(text, lang)
+    
+#     return {
+#         "message": "Text-to-speech is ready",
+#         "text": text,
+#         "audio_base64": audio_base64  
+#     }
 
 # 3- predict
 @app.post("/predict/")
