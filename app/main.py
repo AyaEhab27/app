@@ -117,7 +117,7 @@ async def set_language(request: LanguageRequest):
     return {"message": f"Language set to {language} with {mode} mode"}
 
 
-#@retry(stop=stop_after_attempt(3), wait=wait_fixed(5)) 
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
 def text_to_speech(text, lang):
     try:
         engine = pyttsx3.init()
@@ -146,6 +146,9 @@ def text_to_speech(text, lang):
         file_url = blob.public_url
         return file_url
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error in text-to-speech: {str(e)}")
+
 # 2- text to speech
 @app.get("/text_to_speech/")
 async def speak_text(text: str = Query(..., description="The text to convert to speech"),
@@ -162,8 +165,6 @@ async def speak_text(text: str = Query(..., description="The text to convert to 
         "text": text,
         "audio_url": file_url 
     }
-
-
 
 # 3- predict
 @app.post("/predict/")
