@@ -9,12 +9,14 @@ import os
 import time
 import base64
 import pyttsx3
+from gtts import gTTS
 from fastapi.middleware.cors import CORSMiddleware
 from io import BytesIO
 import firebase_admin
 from firebase_admin import credentials, storage
 from tenacity import retry, stop_after_attempt, wait_fixed
 import uuid
+from google.cloud import storage
 
 #connect with firebase
 cred = credentials.Certificate("app/voice-ec9bd-firebase-adminsdk-fbsvc-0215fa1324.json")
@@ -120,29 +122,27 @@ async def set_language(request: LanguageRequest):
 
 #convert text to speech
 def text_to_speech(text, lang):
-    engine = pyttsx3.init()
-    engine.setProperty('rate', 150)
-    engine.setProperty('volume', 1.0)
-    
-    if lang == "ar":
-        engine.setProperty('voice', 'ar')  
-    else:
-        engine.setProperty('voice', 'en') 
+    try:
+        # تحويل النص إلى كلام باستخدام gTTS
+        tts = gTTS(text=text, lang=lang)
+        audio_file = f"temp_audio_{uuid.uuid4()}.mp3"
+        tts.save(audio_file)
 
-    audio_file = f"temp_audio_{uuid.uuid4()}.mp3"
-    engine.save_to_file(text, audio_file)
-    engine.runAndWait()
+        # تحميل الملف إلى Firebase Storage
+        blob = bucket.blob(f"audio/{audio_file}")
+        blob.upload_from_filename(audio_file)
 
-    bucket = storage.bucket()
-    blob = bucket.blob(f"audio/{audio_file}")
-    blob.upload_from_filename(audio_file)
+        # جعل الملف عامًا والحصول على الرابط
+        blob.make_public()
+        audio_url = blob.public_url
 
-    blob.make_public()
-    audio_url = blob.public_url
+        # حذف الملف المؤقت
+        os.remove(audio_file)
 
-    os.remove(audio_file)
-
-    return audio_url
+        return audio_url
+    except Exception as e:
+        print(f"Error in text_to_speech: {e}")
+        raise
 
 # 2- text to speech
 @app.get("/text_to_speech/")
