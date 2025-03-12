@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from io import BytesIO
 import firebase_admin
 from firebase_admin import credentials, storage
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 #connect with firebase
 cred = credentials.Certificate("app/voice-ec9bd-firebase-adminsdk-fbsvc-0215fa1324.json")
@@ -129,6 +130,7 @@ async def set_language(request: LanguageRequest):
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=f"Error in text-to-speech: {str(e)}")
 # convert text to speech
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
 def text_to_speech(text, lang):
     try:
         temp_dir = "temp"
