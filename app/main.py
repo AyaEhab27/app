@@ -148,16 +148,20 @@ def text_to_speech(text, lang):
 @app.get("/text_to_speech/")
 async def speak_text(text: str = Query(..., description="The text to convert to speech"),
                      language: str = Query(..., description="The language of the text (ar/en)")):
-    if language not in ["ar", "en"]:
-        raise HTTPException(status_code=400, detail="Invalid language. Use 'ar' for Arabic or 'en' for English.")
+    try:
+        if language not in ["ar", "en"]:
+            raise HTTPException(status_code=400, detail="Invalid language. Use 'ar' for Arabic or 'en' for English.")
 
-    file_url = text_to_speech(text, language)
+        file_url = text_to_speech(text, language)
 
-    return {
-        "message": "Text-to-speech is ready",
-        "text": text,
-        "audio_url": file_url
-    }
+        return {
+            "message": "Text-to-speech is ready",
+            "text": text,
+            "audio_url": file_url
+        }
+    except Exception as e:
+        print(f"Error in speak_text: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # 3- predict
