@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from io import BytesIO
 import firebase_admin
 from firebase_admin import credentials, storage
-from tenacity import retry, stop_after_attempt, wait_fixed
+#from tenacity import retry, stop_after_attempt, wait_fixed
 
 #connect with firebase
 cred = credentials.Certificate("app/voice-ec9bd-firebase-adminsdk-fbsvc-0215fa1324.json")
@@ -134,7 +134,7 @@ def text_to_speech(text, lang):
         file_name = f"audio_{int(time.time())}.mp3"
         file_path = os.path.join(temp_dir, file_name)
         engine.save_to_file(text, file_path)
-        engine.runAndWait()
+        #engine.runAndWait()
 
         bucket = storage.bucket()
         blob = bucket.blob(f"audio/{file_name}")
