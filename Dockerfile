@@ -9,16 +9,15 @@ RUN apt-get update && \
     apt-get install -y wget espeak-ng
 
 # تنزيل وتثبيت mbrola
-RUN wget https://github.com/numediart/MBROLA/raw/master/Binaries/mbrola-linux-i386.tar.gz && \
-    tar -xzf mbrola-linux-i386.tar.gz && \
+RUN wget https://github.com/numediart/MBROLA/raw/master/Binaries/mbrola-linux-i386.tar.gz -O mbrola.tar.gz && \
+    tar -xzf mbrola.tar.gz && \
     mv mbrola-linux-i386 /usr/local/bin/mbrola && \
     chmod +x /usr/local/bin/mbrola && \
-    rm mbrola-linux-i386.tar.gz
+    rm mbrola.tar.gz
 
 # تنزيل وتثبيت الأصوات العربية (mbrola-ar1)
-RUN wget https://github.com/numediart/MBROLA/raw/master/Data/ar1/ar1 && \
-    mkdir -p /usr/share/mbrola/ar1 && \
-    mv ar1 /usr/share/mbrola/ar1/ar1 && \
+RUN mkdir -p /usr/share/mbrola/ar1 && \
+    wget https://github.com/numediart/MBROLA-voices/raw/master/data/ar1/ar1 -O /usr/share/mbrola/ar1/ar1 && \
     chmod 644 /usr/share/mbrola/ar1/ar1
 
 # Copy the requirements file into the container
