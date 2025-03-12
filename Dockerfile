@@ -6,19 +6,7 @@ WORKDIR /app
 
 # تثبيت الحزم الأساسية
 RUN apt-get update && \
-    apt-get install -y wget espeak-ng
-
-# تنزيل وتثبيت mbrola
-RUN wget https://github.com/numediart/MBROLA/raw/master/Binaries/mbrola-linux-i386.tar.gz -O mbrola.tar.gz && \
-    tar -xzf mbrola.tar.gz && \
-    mv mbrola-linux-i386 /usr/local/bin/mbrola && \
-    chmod +x /usr/local/bin/mbrola && \
-    rm mbrola.tar.gz
-
-# تنزيل وتثبيت الأصوات العربية (mbrola-ar1)
-RUN mkdir -p /usr/share/mbrola/ar1 && \
-    wget https://github.com/numediart/MBROLA-voices/raw/master/data/ar1/ar1 -O /usr/share/mbrola/ar1/ar1 && \
-    chmod 644 /usr/share/mbrola/ar1/ar1
+    apt-get install -y espeak-ng
 
 # Copy the requirements file into the container
 COPY app/requirements.txt .
