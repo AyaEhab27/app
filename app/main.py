@@ -119,11 +119,12 @@ async def set_language(request: LanguageRequest):
 
 
 #convert text to speech
-def text_to_speech(text):
+def text_to_speech(text, lang):
     engine = pyttsx3.init()
-    engine.setProperty('rate', 150) 
-    engine.setProperty('volume', 1.0)  
-    if current_language.startswith("arabic"):
+    engine.setProperty('rate', 150)
+    engine.setProperty('volume', 1.0)
+    
+    if lang == "ar":
         engine.setProperty('voice', 'ar')  
     else:
         engine.setProperty('voice', 'en') 
@@ -150,14 +151,12 @@ async def speak_text(text: str = Query(..., description="The text to convert to 
     if language not in ["ar", "en"]:
         raise HTTPException(status_code=400, detail="Invalid language. Use 'ar' for Arabic or 'en' for English.")
 
-    lang = "ar" if language == "ar" else "en"
-    
-    file_url = text_to_speech(text, lang)
+    file_url = text_to_speech(text, language)
 
     return {
         "message": "Text-to-speech is ready",
         "text": text,
-        "audio_url": file_url 
+        "audio_url": file_url
     }
 
 
