@@ -157,7 +157,7 @@ async def speak_text(text: str = Query(..., description="The text to convert to 
     return {
         "message": "Text-to-speech is ready",
         "text": text,
-        "audio_url": file_url  # إرجاع رابط الصوت بدلاً من البيانات المشفرة Base64
+        "audio_url": file_url  
     }
 
 
