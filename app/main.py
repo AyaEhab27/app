@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from io import BytesIO
 import firebase_admin
 from firebase_admin import credentials, storage
-#from tenacity import retry, stop_after_attempt, wait_fixed
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 #connect with firebase
 cred = credentials.Certificate("app/voice-ec9bd-firebase-adminsdk-fbsvc-0215fa1324.json")
