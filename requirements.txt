@@ -5,7 +5,8 @@ tensorflow
 opencv-python
 mediapipe
 pydantic
-pyttsx3
+gtts
+google-cloud-storage
 python-multipart
 firebase-admin
 tenacity
