@@ -129,7 +129,7 @@ async def set_language(request: LanguageRequest):
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=f"Error in text-to-speech: {str(e)}")
 # convert text to speech
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
+#@retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
 def text_to_speech(text, lang):
     try:
         temp_dir = "temp"
