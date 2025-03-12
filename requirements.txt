@@ -8,3 +8,4 @@ pydantic
 gtts
 python-multipart
 firebase-admin
+tenacity
