@@ -15,7 +15,7 @@ import firebase_admin
 from firebase_admin import credentials, storage
 
 #connect with firebase
-cred = credentials.Certificate(os.path.join(os.path.dirname(__file__), "voice-ec9bd-firebase-adminsdk-fbsvc-0215fa1324.json"))
+cred = credentials.Certificate("app/voice-ec9bd-firebase-adminsdk-fbsvc-0215fa1324.json")
 firebase_admin.initialize_app(cred, {
     "storageBucket": "voice-ec9bd.com" 
 })
@@ -116,20 +116,7 @@ async def set_language(request: LanguageRequest):
     return {"message": f"Language set to {language} with {mode} mode"}
 
 
-# def text_to_speech(text, lang):
-#     try:
-#         audio_buffer = BytesIO()
-#         tts = gTTS(text=text, lang=lang)
-#         tts.write_to_fp(audio_buffer)
-#         audio_buffer.seek(0) 
 
-#         audio_base64 = base64.b64encode(audio_buffer.read()).decode('utf-8')
-
-#         return audio_base64 
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Error in text-to-speech: {str(e)}")
-# convert text to speech
-#@retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
 def text_to_speech(text, lang):
     try:
         temp_dir = "temp"
@@ -174,21 +161,6 @@ async def speak_text(text: str = Query(..., description="The text to convert to 
     }
 
 
-# @app.get("/text_to_speech/")
-# async def speak_text(text: str = Query(..., description="The text to convert to speech"), 
-#                      language: str = Query(..., description="The language of the text (ar/en)")):
-#     if language not in ["ar", "en"]:
-#         raise HTTPException(status_code=400, detail="Invalid language. Use 'ar' for Arabic or 'en' for English.")
-    
-#     lang = "ar" if language == "ar" else "en"
-    
-#     audio_base64 = text_to_speech(text, lang)
-    
-#     return {
-#         "message": "Text-to-speech is ready",
-#         "text": text,
-#         "audio_base64": audio_base64  
-#     }
 
 # 3- predict
 @app.post("/predict/")
