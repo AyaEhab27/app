@@ -131,9 +131,13 @@ async def set_language(request: LanguageRequest):
 # convert text to speech
 def text_to_speech(text, lang):
     try:
+        temp_dir = "temp"
+        if not os.path.exists(temp_dir):
+            os.makedirs(temp_dir)
+
         tts = gTTS(text=text, lang=lang)
         file_name = f"audio_{int(time.time())}.mp3"
-        file_path = f"temp/{file_name}"
+        file_path = os.path.join(temp_dir, file_name)
 
         tts.save(file_path)
 
@@ -142,13 +146,14 @@ def text_to_speech(text, lang):
         blob.upload_from_filename(file_path)
         blob.make_public()  
 
+        os.remove(file_path)
+
         file_url = blob.public_url
 
         return file_url
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error in text-to-speech: {str(e)}")
-
 
 # 2- text to speech
 @app.get("/text_to_speech/")
