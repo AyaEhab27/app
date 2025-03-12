@@ -8,7 +8,7 @@ import mediapipe as mp
 import os
 import time
 import base64
-from gtts import gTTS
+import pyttsx3
 from fastapi.middleware.cors import CORSMiddleware
 from io import BytesIO
 import firebase_admin
@@ -117,32 +117,34 @@ async def set_language(request: LanguageRequest):
     return {"message": f"Language set to {language} with {mode} mode"}
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(5)) 
+#@retry(stop=stop_after_attempt(3), wait=wait_fixed(5)) 
 def text_to_speech(text, lang):
     try:
+        engine = pyttsx3.init()
+
+        if lang == "ar":
+            engine.setProperty('voice', 'ar') 
+        else:
+            engine.setProperty('voice', 'en')  
+
         temp_dir = "temp"
         if not os.path.exists(temp_dir):
             os.makedirs(temp_dir)
-        time.sleep(2) 
-        tts = gTTS(text=text, lang=lang)
+
         file_name = f"audio_{int(time.time())}.mp3"
         file_path = os.path.join(temp_dir, file_name)
-
-        tts.save(file_path)
+        engine.save_to_file(text, file_path)
+        engine.runAndWait()
 
         bucket = storage.bucket()
         blob = bucket.blob(f"audio/{file_name}")
         blob.upload_from_filename(file_path)
-        blob.make_public()  
+        blob.make_public() 
 
         os.remove(file_path)
 
         file_url = blob.public_url
-
         return file_url
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error in text-to-speech: {str(e)}")
 
 # 2- text to speech
 @app.get("/text_to_speech/")
@@ -158,7 +160,7 @@ async def speak_text(text: str = Query(..., description="The text to convert to 
     return {
         "message": "Text-to-speech is ready",
         "text": text,
-        "audio_url": file_url  
+        "audio_url": file_url 
     }
 
 
