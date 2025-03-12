@@ -136,7 +136,7 @@ def text_to_speech(text, lang):
         temp_dir = "temp"
         if not os.path.exists(temp_dir):
             os.makedirs(temp_dir)
-        time.sleep(1)
+       # time.sleep(1)
         tts = gTTS(text=text, lang=lang)
         file_name = f"audio_{int(time.time())}.mp3"
         file_path = os.path.join(temp_dir, file_name)
