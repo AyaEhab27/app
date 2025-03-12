@@ -2,7 +2,11 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y espeak-ng mbrola-ar1
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    apt-add-repository non-free && \
+    apt-get update && \
+    apt-get install -y espeak-ng mbrola-ar1
 
 COPY app/requirements.txt .
 
