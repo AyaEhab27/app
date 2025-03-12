@@ -116,13 +116,13 @@ async def set_language(request: LanguageRequest):
     return {"message": f"Language set to {language} with {mode} mode"}
 
 
-
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(5)) 
 def text_to_speech(text, lang):
     try:
         temp_dir = "temp"
         if not os.path.exists(temp_dir):
             os.makedirs(temp_dir)
-        #time.sleep(1)
+        time.sleep(2) 
         tts = gTTS(text=text, lang=lang)
         file_name = f"audio_{int(time.time())}.mp3"
         file_path = os.path.join(temp_dir, file_name)
