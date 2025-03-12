@@ -13,7 +13,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from io import BytesIO
 import firebase_admin
 from firebase_admin import credentials, storage
-from tenacity import retry, stop_after_attempt, wait_fixed
 
 #connect with firebase
 cred = credentials.Certificate(os.path.join(os.path.dirname(__file__), "voice-ec9bd-firebase-adminsdk-fbsvc-0215fa1324.json"))
@@ -136,7 +135,7 @@ def text_to_speech(text, lang):
         temp_dir = "temp"
         if not os.path.exists(temp_dir):
             os.makedirs(temp_dir)
-        time.sleep(1)
+        #time.sleep(1)
         tts = gTTS(text=text, lang=lang)
         file_name = f"audio_{int(time.time())}.mp3"
         file_path = os.path.join(temp_dir, file_name)
