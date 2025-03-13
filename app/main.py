@@ -14,12 +14,14 @@ import firebase_admin
 from firebase_admin import credentials, storage
 import uuid
 import logging
+from dotenv import load_dotenv
+import json
 
 # Initialize Firebase
-current_dir = os.path.dirname(os.path.abspath(__file__))  
-json_file_path = os.path.join(current_dir, "gestuer-vox-firebase-adminsdk-vwtxg-5d521c3992.json")
+load_dotenv()
 
-cred = credentials.Certificate(json_file_path)
+firebase_credentials = json.loads(os.getenv('FIREBASE_CREDENTIALS'))
+cred = credentials.Certificate(firebase_credentials)
 firebase_admin.initialize_app(cred, {
     'storageBucket': 'gestuer-vox.appspot.com'
 })
