@@ -16,10 +16,9 @@ import uuid
 import logging
 
 # Initialize Firebase
-current_dir = os.path.dirname(os.path.abspath(__file__))  # المجلد الحالي
-json_file_path = os.path.join(current_dir, "app", "voice-ec9bd-firebase-adminsdk-fbsvc-0bef6abfcb.json")
+current_dir = os.path.dirname(os.path.abspath(__file__))  
+json_file_path = os.path.join(current_dir, "voice-ec9bd-firebase-adminsdk-fbsvc-0bef6abfcb.json")
 
-# تهيئة Firebase
 cred = credentials.Certificate(json_file_path)
 firebase_admin.initialize_app(cred, {
     'storageBucket': 'voice-ec9bd.appspot.com'
@@ -145,12 +144,12 @@ def text_to_speech(text, lang):
         tts = gTTS(text=text, lang=lang)
         tts.save(output_file)
         
-        # Upload the file to Firebase Storage
+        
         unique_id = str(uuid.uuid4())
         destination_path = f"audio_files/{unique_id}.mp3"
         public_url = upload_to_firebase(output_file, destination_path)
         
-        return public_url  # Return the public URL of the uploaded file
+        return public_url  
     except Exception as e:
         logging.error(f"Error in text-to-speech: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error in text-to-speech: {str(e)}")
