@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
 from firebase_admin import credentials, storage
 import uuid
+import logging
 
 # Initialize Firebase
 cred = credentials.Certificate("app/voice-ec9bd-firebase-adminsdk-fbsvc-0215fa1324.json")  
@@ -123,6 +124,15 @@ async def set_language(request: LanguageRequest):
     current_mode = mode
     return {"message": f"Language set to {language} with {mode} mode"}
 
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+
+# Define AUDIO_FOLDER
+AUDIO_FOLDER = "audio_files"
+if not os.path.exists(AUDIO_FOLDER):
+    os.makedirs(AUDIO_FOLDER)
+    
 # Convert text to speech
 def text_to_speech(text, lang):
     try:
@@ -138,6 +148,7 @@ def text_to_speech(text, lang):
         
         return public_url  # Return the public URL of the uploaded file
     except Exception as e:
+        logging.error(f"Error in text-to-speech: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error in text-to-speech: {str(e)}")
 
 # 2- Text to speech
