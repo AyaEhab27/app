@@ -15,7 +15,7 @@ from firebase_admin import credentials, storage
 import uuid
 
 # Initialize Firebase
-cred = credentials.Certificate("voice-ec9bd-firebase-adminsdk-fbsvc-0215fa1324.json")  
+cred = credentials.Certificate("app/voice-ec9bd-firebase-adminsdk-fbsvc-0215fa1324.json")  
 firebase_admin.initialize_app(cred, {
     'storageBucket': 'voice-ec9bd.com'  
 })
