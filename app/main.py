@@ -16,7 +16,11 @@ import uuid
 import logging
 
 # Initialize Firebase
-cred = credentials.Certificate("app/voice-ec9bd-firebase-adminsdk-fbsvc-0bef6abfcb.json")
+current_dir = os.path.dirname(os.path.abspath(__file__))  # المجلد الحالي
+json_file_path = os.path.join(current_dir, "app", "voice-ec9bd-firebase-adminsdk-fbsvc-0bef6abfcb.json")
+
+# تهيئة Firebase
+cred = credentials.Certificate(json_file_path)
 firebase_admin.initialize_app(cred, {
     'storageBucket': 'voice-ec9bd.appspot.com'
 })
