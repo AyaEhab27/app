@@ -17,6 +17,8 @@ import logging
 from dotenv import load_dotenv
 import json
 
+
+
 # Initialize Firebase
 load_dotenv()
 
@@ -28,6 +30,12 @@ try:
     firebase_credentials = json.loads(firebase_credentials)
 except json.JSONDecodeError as e:
     raise ValueError(f"Invalid JSON in FIREBASE_CREDENTIALS: {e}")
+
+if not firebase_admin._apps: 
+    cred = credentials.Certificate(firebase_credentials)
+    firebase_admin.initialize_app(cred, {
+        'storageBucket': 'gestuer-vox.appspot.com'
+    })
 
 # Function to upload file to Firebase Storage
 def upload_to_firebase(file_path, destination_path):
