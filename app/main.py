@@ -39,9 +39,9 @@ load_dotenv()
 #         'storageBucket': 'gestuer-vox.appspot.com'
 #     })
 cloudinary.config(
-    cloud_name=os.getenv(duxc6oeju),
-    api_key=os.getenv('658624133868188'),
-    api_secret=os.getenv('DCoO4wlhT3-nMYTr11096S2MmYk')
+    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.getenv('CLOUDINARY_API_KEY'),
+    api_secret=os.getenv('CLOUDINARY_API_SECRET')
    )
 
 # Function to upload file to cloudinary Storage
