@@ -16,9 +16,9 @@ import uuid
 import logging
 
 # Initialize Firebase
-cred = credentials.Certificate("app/voice-ec9bd-firebase-adminsdk-fbsvc-0215fa1324.json")  
+cred = credentials.Certificate("app/voice-ec9bd-firebase-adminsdk-fbsvc-0bef6abfcb.json")  
 firebase_admin.initialize_app(cred, {
-    'storageBucket': 'voice-ec9bd.com'  
+    'storageBucket': 'voice-ec9bd.appspot.com'  
 })
 
 # Function to upload file to Firebase Storage
