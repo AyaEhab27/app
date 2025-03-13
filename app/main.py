@@ -17,11 +17,11 @@ import logging
 
 # Initialize Firebase
 current_dir = os.path.dirname(os.path.abspath(__file__))  
-json_file_path = os.path.join(current_dir, "voice-ec9bd-firebase-adminsdk-fbsvc-0bef6abfcb.json")
+json_file_path = os.path.join(current_dir, "gestuer-vox-firebase-adminsdk-vwtxg-5d521c3992.json")
 
 cred = credentials.Certificate(json_file_path)
 firebase_admin.initialize_app(cred, {
-    'storageBucket': 'voice-ec9bd.appspot.com'
+    'storageBucket': 'gestuer-vox.appspot.com'
 })
 
 # Function to upload file to Firebase Storage
