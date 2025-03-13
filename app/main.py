@@ -15,9 +15,9 @@ from firebase_admin import credentials, storage
 import uuid
 
 # Initialize Firebase
-cred = credentials.Certificate("path/to/serviceAccountKey.json")  # Replace with your path
+cred = credentials.Certificate("voice-ec9bd-firebase-adminsdk-fbsvc-0215fa1324.json")  
 firebase_admin.initialize_app(cred, {
-    'storageBucket': 'your-storage-bucket-url'  # Replace with your Firebase Storage bucket URL
+    'storageBucket': 'voice-ec9bd.com'  
 })
 
 # Function to upload file to Firebase Storage
