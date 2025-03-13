@@ -5,7 +5,8 @@ tensorflow
 opencv-python
 mediapipe
 pydantic
-gtts
+uuid
+gTTS
 google-cloud-storage
 python-multipart
 firebase-admin
