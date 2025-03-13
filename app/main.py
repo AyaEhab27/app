@@ -163,7 +163,6 @@ async def speak_text(text: str = Query(..., description="The text to convert to 
         print(f"Error in speak_text: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-
 # 3- predict
 @app.post("/predict/")
 async def predict(request: PredictionRequest):
