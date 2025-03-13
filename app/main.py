@@ -16,35 +16,42 @@ import uuid
 import logging
 from dotenv import load_dotenv
 import json
+import cloudinary
+import cloudinary.uploader
 
 
 
 # Initialize Firebase
 load_dotenv()
 
-firebase_credentials = os.getenv('FIREBASE_CREDENTIALS')
-if firebase_credentials is None:
-    raise ValueError("FIREBASE_CREDENTIALS environment variable is not set")
+# firebase_credentials = os.getenv('FIREBASE_CREDENTIALS')
+# if firebase_credentials is None:
+#     raise ValueError("FIREBASE_CREDENTIALS environment variable is not set")
 
-try:
-    firebase_credentials = json.loads(firebase_credentials)
-except json.JSONDecodeError as e:
-    raise ValueError(f"Invalid JSON in FIREBASE_CREDENTIALS: {e}")
+# try:
+#     firebase_credentials = json.loads(firebase_credentials)
+# except json.JSONDecodeError as e:
+#     raise ValueError(f"Invalid JSON in FIREBASE_CREDENTIALS: {e}")
 
-if not firebase_admin._apps: 
-    cred = credentials.Certificate(firebase_credentials)
-    firebase_admin.initialize_app(cred, {
-        'storageBucket': 'gestuer-vox.appspot.com'
-    })
+# if not firebase_admin._apps: 
+#     cred = credentials.Certificate(firebase_credentials)
+#     firebase_admin.initialize_app(cred, {
+#         'storageBucket': 'gestuer-vox.appspot.com'
+#     })
+cloudinary.config(
+    cloud_name="duxc6oeju",
+    api_key="658624133868188",
+    api_secret="DCoO4wlhT3-nMYTr11096S2MmYk"
+)
 
-# Function to upload file to Firebase Storage
-def upload_to_firebase(file_path, destination_path):
-    bucket = storage.bucket()
-    blob = bucket.blob(destination_path)
-    blob.upload_from_filename(file_path)
-    blob.make_public()
-    return blob.public_url
-
+# Function to upload file to cloudinary Storage
+def upload_to_cloudinary(file_path):
+    try:
+        response = cloudinary.uploader.upload(file_path, resource_type="auto")
+        return response['secure_url']  
+    except Exception as e:
+        logging.error(f"Error uploading to Cloudinary: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error uploading to Cloudinary: {str(e)}")
 # Start API
 app = FastAPI()
 app.add_middleware(
@@ -156,13 +163,12 @@ def text_to_speech(text, lang):
         output_file = os.path.join(AUDIO_FOLDER, f"output_{timestamp}.mp3")
         tts = gTTS(text=text, lang=lang)
         tts.save(output_file)
-        
-        
-        unique_id = str(uuid.uuid4())
-        destination_path = f"audio_files/{unique_id}.mp3"
-        public_url = upload_to_firebase(output_file, destination_path)
-        
-        return public_url  
+
+        public_url = upload_to_cloudinary(output_file)
+
+        os.remove(output_file)
+
+        return public_url
     except Exception as e:
         logging.error(f"Error in text-to-speech: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error in text-to-speech: {str(e)}")
@@ -181,8 +187,9 @@ async def speak_text(text: str = Query(..., description="The text to convert to 
     return {
         "message": "Text-to-speech is played",
         "text": text,
-        "audio_url": audio_url  # Return the Firebase Storage URL
+        "audio_url": audio_url  # Return the Cloudinary URL
     }
+
 
 # 3- Download audio
 @app.get("/download_audio/")
